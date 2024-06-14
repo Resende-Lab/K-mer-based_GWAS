@@ -1,0 +1,34 @@
+#!/bin/bash
+#SBATCH --job-name=mapping
+#SBATCH --mail-user=user_mail
+#SBATCH --mail-type=END,FAIL
+#SBATCH --nodes=1
+#SBATCH --mem=30GB
+#SBATCH --time=96:00:00
+#SBATCH --output=bowtie_%A_%j.out
+#SBATCH --error=bowtie_%A_%j.err
+#SBATCH --array=1-40 ##number of traits
+
+module load bowtie
+
+cd /path/to/library
+
+#Index reference
+bowtie-build  /blue/mresende/share/vcolantonio/2.genomes/Ia453/Zm-Ia453-REFERENCE-FL-1.0.fa Ia453
+
+trait=$(cat list_pheno.txt | head -n ${SLURM_ARRAY_TASK_ID} | tail -n 1)
+
+#Alignment
+
+bowtie --best --strata -m 1 -f -S --chunkmbs=256000 Ia453 ./"$trait"/kmers/output/"$trait"all_P.fasta ./"$trait"/kmers/output/"$trait"_all_P.sam
+
+##-best: report only the single best aligment for each read.
+##-strata: stratum, When multiples aligments have the sabe best score, botwtie reports all of them as a stratrum. One aligment of each stratum.
+##-m:This parameter sets an upper limit on the number of valid alignments to report for each read. If a read has more than this number of valid alignments,
+        #only the best alignments up to this limit are reported
+
+module load samtools
+
+samtools view ./"$trait"/kmers/output/"$trait"_all_P.sam > ./"$trait"/kmers/output/Ia453_"$trait"_all_P.sam
+
+samtools view -f4 ./"$trait"/kmers/output/"$trait".sam > ./"$trait"/kmers/output/Ia453_"$trait"_unmapped.sam
