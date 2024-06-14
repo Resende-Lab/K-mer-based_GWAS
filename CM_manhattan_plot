@@ -1,0 +1,107 @@
+rm(list=ls())
+args = commandArgs (trailingOnly = TRUE)
+library(CMplot)
+library(Rsamtools)
+
+#This script will manipulate all gwas_trait output files from Voichek`s pipeline (lmm)
+# We are getting 100K kmers to plot
+##User will have to adjust scrit for their reference and species chr number
+
+setwd("/path/to/GWAS/output/folder/")
+
+directory_name <- as.character(args[1])
+directory_name
+directory_name <- as.character("AC_GxE")
+
+setwd(paste("/path/to/GWAS/output/folder/", directory_name, "/kmers/output/", sep = ""))
+getwd()
+
+dir_path <- (paste("/path/to/GWAS/output/folder/", directory_name, "/kmers/output/", sep = ""))
+dir_path
+
+# kmer_data <- read.table(paste(dir_path, "kmer_data.txt", sep =  ""), sep = "\t", header  = TRUE)
+# head(kmer_data)
+
+merged_data <- read.table(paste(dir_path, "kmer_data.txt", sep =  ""), sep = "\t", header  = TRUE)
+head(merged_data)
+#sam_file <- "Ia453_AC_GxE.sam"
+sam_file <-  read.csv(paste(dir_path, "Ia453_", directory_name, "_all_P.sam", sep = ""), sep = "\t", header = FALSE)
+#bam_file <- scanBam(sam_file)
+head(sam_file) ##verify if sam files was raed correctly
+
+align <- sam_file[, c(1,3,4,10)]
+colnames(align) <- c("Kmer_ID", "chr", "ps", "kmer")
+head(align)
+
+align2 <- align[align$chr %in% c("Chr1", 'Chr2', 'Chr3', 'Chr4', 'Chr5',
+                                   'Chr6', 'Chr7', 'Chr8', 'Chr9', "Chr10"),]
+
+head(align2)
+assoc <- align2
+axisdf = data.frame(Chromosome       = c("chr1", 'chr2', 'chr3', 'chr4', 'chr5',
+
+                                         'chr6', 'chr7', 'chr8', 'chr9', "chr10"),
+                    center = c(mean(assoc$ps[assoc$chr == "Chr1"], na.rm = TRUE),
+                               mean(assoc$ps[assoc$chr == "Chr2"]),
+                               mean(assoc$ps[assoc$chr == "Chr3"]),
+                               mean(assoc$ps[assoc$chr == "Chr4"]),
+                               mean(assoc$ps[assoc$chr == "Chr5"]),
+                               mean(assoc$ps[assoc$chr == "Chr6"]),
+                               mean(assoc$ps[assoc$chr == "Chr7"]),
+                               mean(assoc$ps[assoc$chr == "Chr8"]),
+                               mean(assoc$ps[assoc$chr == "Chr9"]),
+                               mean(assoc$ps[assoc$chr == "Chr10"])))
+
+#input <- merge(align, kmer_data, by = "kmer")
+input <- merge(align, merged_data, by = "kmer")
+head(input)
+
+#input_final <- input[,c(1,2,3,4,6)]
+input_final <- input[,c(1,2,3,4,13)]
+colnames(input_final) <- c ("kmer", "Kmer_ID", "chr", "ps", "p_lrt")
+head(input_final)
+
+write.table(input_final, file = paste(dir_path, "plot_input_all_P.txt", sep = ""), sep = "\t", quote = FALSE, row.names = FALSE)
+
+plot_input <- read.table(paste (dir_path, "plot_input.txt", sep = ""), sep = "\t", header = TRUE)
+plot_input <- input_final
+
+head(plot_input)
+plot_input$chr
+
+#removing '*' and scaffolds
+plot_input <- plot_input[!grepl("\\*", plot_input$chr), ]
+plot_input <- plot_input[!grepl("^Scaffold", plot_input$chr), ]
+
+plot_input$chr
+
+# Remove 'Chr' from the 'chr' column
+plot_input$chr <- gsub("Chr", "", plot_input$chr)
+
+plot_input$chr <- as.numeric(plot_input$chr)
+plot_input$chr
+# Sort the data frame by 'chr' and 'ps'
+plot_input <- plot_input[order(plot_input$chr, as.numeric(plot_input$ps)), ]
+
+head(plot_input)
+tail(plot_input)
+
+n_observations <- print(nrow(plot_input))
+cat ("The number of obs on", directory_name, " is", n_observations)
+
+write.table(plot_input, file = paste(dir_path, "all_P_plot_input_filtered_final.txt", sep = ""), sep = "\t", quote = FALSE, row.names = FALSE)
+
+plot_input$p_value <- as.numeric(plot_input$p_lrt)
+plot_input$pos <- as.numeric(plot_input$ps)
+plot_input$SNP <- as.character(plot_input$Kmer_ID)
+str(plot_input)
+
+plot_data <- as.data.frame(cbind(SNP = plot_input$SNP, chr = plot_input$chr, pos = plot_input$pos, trait = plot_input$p_value))
+
+plot_title <- "Trait Name"
+plot_title
+
+CMplot(plot_data,plot.type="m",LOG10=TRUE,
+       threshold=c(0.05/nrow(plot_data)), threshold.lty=c(2),
+       threshold.lwd=c(1), threshold.col=c("black"), file="jpg",dpi=300,file.output=T,verbose=T,
+       signal.col = NULL, amplify = F,cex=0.7, band=1,chr.den.col=NULL, main = plot_title)
