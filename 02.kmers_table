@@ -1,0 +1,53 @@
+#!/bin/bash
+#SBATCH --job-name=kmers
+#SBATCH --output=kmers_%j.out
+#SBATCH --error=kmers_%j.err
+#https://github.com/voichek/kmersGWAS/blob/master/manual.pdf
+
+module load kmc/3.1.1
+module load R/4.1
+module load gemma/0.98.1
+module load gcc/9.3.0
+module load bamtools
+
+#List all k-mers to be used in GWAS for all individuals
+#a k-mer needs to appear at least 5 individuals and at least 20% in each canonized/non-canonized of individuals from which it appeared in.
+#-l: list of separate k-mers files
+#--mac: minor allele count
+#-p: minimum percent of appearance in each strand form
+
+cd /path/to/library/
+
+./bin/list_kmers_found_in_multiple_samples -l kmers_list_paths.txt -k 31 --mac 5 -p 0.2 -o kmers_to_use
+
+#Creating a k-mers table containing the presence/absence pattern of each k-mer in the pop. 
+#-a: path to file with all k-mers
+
+./bin/build_kmers_table -l kmers_list_paths.txt -k 31 -a kmers_to_use -o kmers_table
+
+#Calculation of the kinship matrix 
+
+#-t: k-mers table prefix path
+#-k: length of k-mers
+#--maf: minor allele frequency
+
+./bin/emma_kinship_kmers -t kmers_table -k 31 --maf 0.05 > kmers_table.kinship
+
+#K-mers table conversation to PLINK binary format
+#-t: kmers table prefix path
+#-k: lenght of kmers
+#-p: phenotype file, condense output only to individuals with a phenotype
+#--maf: minor allele frequency
+#--mac: minor allelle count
+#-b: maxial number of variants in each PLINK bed file
+#-o: prefix for output files
+#-u: output only unique presence/absence patterns
+
+./bin/kmers_table_to_bed -t ./kmers_table -k 31 -p phenotype_file.pheno --maf 0.05 --mac 1 -b 10000000 -o ./Output/phenotype/PLINK_kmers_pheno
+
+#textual output of kmers presence/absence pattern
+#-t: kmers table prefix path
+#-k: file with k-mers, each k-mers in a seperate line
+#-o: output file
+
+bin/filter_kmers -t ./kmers_table -k kmers_list.txt -o output.txt
