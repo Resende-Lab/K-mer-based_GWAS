@@ -1,0 +1,99 @@
+Example of how to plot a manhathan plot using SNP and K-mers GWAS output. Here we highlighted k-mer above the SNP threshold.
+
+To run a slurm arrray for all traits:
+
+#!/bin/bash
+#SBATCH --job-name=DB_CM_plot
+#SBATCH --output=CM_plot_%A_%a.out
+#SBATCH --error=CM_plot_%A_%a.err
+#SBATCH --array=1-20
+
+folder=$(cat /blue/mresende/share/viannam/Kmers/kmersGWAS/trait_list.txt |head -n ${SLURM_ARRAY_TASK_ID} |tail -n 1)
+module load R
+Rscript Double_CM_plot.R $folder
+
+R script:
+
+##Double CMplot
+
+
+rm(list=ls())
+args <- commandArgs(trailingOnly = TRUE)
+directory_name <- as.character(args[1])
+directory_name
+
+setwd(paste0("/path/to/GWAS/outputs/folder/", directory_name, "/kmers/output"))
+
+library(dplyr)
+library(CMplot)
+
+file <- read.table(paste0("/path/to/SNP_vcf_file/", directory_name, "snp_vcf_file", directory_name, ".ps"))
+
+head(file)
+
+SNP_file <- data.frame(SNP = seq_len(nrow(file)))
+
+chrom_pos <- sub("Chr([0-9]+)_", "", file$V1)
+chrom_pos <- as.numeric(gsub("_.*", "", chrom_pos))
+
+SNP_file$chr <- sub("_(.*)", "", file$V1)
+SNP_file$ps <- chrom_pos
+
+SNP_file$p_lrt <- file$V3
+
+SNP_file$chr <- gsub("Chr", "", SNP_file$chr)
+str(SNP_file)
+head(SNP_file)
+
+kmer_file <- read.table(paste0("/path/to/GWAS/outputs/folder/" ,directory_name, "/kmers/output/plot_input_filtered.txt"), header = TRUE, sep = "\t")
+head(kmer_file)
+
+kmers <- kmer_file[, 2:5]
+
+# Rename Kmer_ID column to SNP
+names(kmers)[names(kmers) == "Kmer_ID"] <- "SNP"
+#Add "Chr" at the beginning of values in the chr column
+#kmers$chr <- paste0("Chr", kmers$chr)
+kmers$SNP <- paste0("kmer_", kmers$SNP)
+
+str(kmers)
+
+head(kmers)
+
+combined_file <- rbind(SNP_file, kmers)
+head(combined_file)
+tail(combined_file)
+
+threshold_snp <- -log10(0.05 / nrow(SNP_file))
+threshold_kmer <- -log10(0.05 / 1.31e+09)
+
+plot_title <- directory_name
+plot_title
+
+
+kmer_markers <- combined_file[grepl("^kmer", combined_file$SNP), ] # can use just the kmer_file
+
+kmers2 = kmers
+SNP_file2 = SNP_file
+
+# estimating the p-value
+kmers2$p_lrt = -log10(kmers2$p_lrt)
+SNP_file2$p_lrt = -log10(SNP_file2$p_lrt)
+
+# threshold
+kmers3 = kmers2[kmers2$p_lrt >= threshold_snp,]
+
+# Combining them
+combined_file <- rbind(SNP_file2, kmers3)
+head(combined_file)
+
+# Highlight
+SNPs <- kmers3$SNP
+head(SNPs)
+
+
+CMplot(combined_file, plot.type="m",LOG10=FALSE,col=c("grey60", "#4197d8"),highlight=SNPs,threshold=c(threshold_kmer,threshold_snp),
+       threshold.lty=c(1,2), threshold.col=c("black"),threshold.lwd=c(1,1),
+       highlight.col="blue",highlight.cex=1,highlight.pch=19,file="jpg",file.name=plot_title,
+       dpi=300,file.output=TRUE,verbose=TRUE,width=14,height=6)
+
