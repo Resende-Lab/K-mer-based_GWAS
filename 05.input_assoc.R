@@ -5,15 +5,15 @@ args = commandArgs (trailingOnly = TRUE)
 # We are getting 100K kmers to plot
 ##First, lets merge all assoc files
 
-setwd("/blue/mresende/share/viannam/Kmers/kmersGWAS/")
+setwd("/path/to/GWAS/outputs/folders")
 
 directory_name <- as.character(args[1])
-#directory_name <- as.character("AC_GxE")
+#directory_name <- as.character("trait_folder_name")
 
-setwd(paste("/blue/mresende/share/viannam/Kmers/kmersGWAS/", directory_name, "/kmers/output/", sep = ""))
+setwd(paste("/path/to/GWAS/outputs/folders", directory_name, "/kmers/output/", sep = ""))
 getwd()
 
-file_list <- list.files(paste("/blue/mresende/share/viannam/Kmers/kmersGWAS/", directory_name, "/kmers/output/", sep = ""), pattern = "P*.assoc.txt")
+file_list <- list.files(paste("/path/to/GWAS/outputs/folders", directory_name, "/kmers/output/", sep = ""), pattern = "P*.assoc.txt")
 
 file_list <- file_list[!grepl("phenotype_value.assoc.txt", file_list)]
 
@@ -60,7 +60,7 @@ write.table(merged_data, file = merge_data_path, sep = "\t", quote = FALSE, row.
 ##Second, lets create the kmer fasta file information
 
 # Define the file path for the Fasta file
-fasta_file_path <- paste("/blue/mresende/share/viannam/Kmers/kmersGWAS/", directory_name, "/kmers/output/", directory_name, "all_P.fasta", sep = "")
+fasta_file_path <- paste("/path/to/GWAS/outputs/folders", directory_name, "/kmers/output/", directory_name, "all_P.fasta", sep = "")
 
 
 # Open the file for writing
