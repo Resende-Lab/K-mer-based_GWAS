@@ -1,0 +1,23 @@
+#!/bin/bash
+#SBATCH --job-name=k-gwas
+#SBATCH --output=k-gwas_%j.out
+#SBATCH --error=k-gwas_%j.err
+
+module load kmc/3.1.1
+module load R/4.1
+module load gemma/0.98.1
+module load gcc/9.3.0
+module load bamtools
+
+cd /path/to/library/
+
+#Run kmers based GWAS with permutation based-threshold
+#--pheno: a file with numerical phenotypic information (Not acept NA values) (na mesma ordem da kinship)
+#--kmers_table: path to k-mers table
+#-l: k-mers length
+#-p: maximum number of threads to use
+#-k: number of k-mer to be outputed on the k-mer_association file
+#--outdir: path to a directory output
+
+python2.7 kmers_gwas.py --gemma_path ./external_programs/gemma --pheno phenotype.pheno --kmers_table ./kmers_table -l 31 -p 8 \
+-k 100000 --dont_remove_intermediates --maf 0.05 --pattern_counter --outdir ./output/pheno/
