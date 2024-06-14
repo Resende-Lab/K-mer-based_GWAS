@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=kmers
+#SBATCH --job-name=KOC
 #SBATCH --mail-user=user_mail
 #SBATCH --mail-type=END,FAIL
 #SBATCH --nodes=1
