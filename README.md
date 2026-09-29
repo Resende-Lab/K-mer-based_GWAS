@@ -10,7 +10,7 @@
 
 ### Content
 
-1.Runme_KOC.sh: File containing....
+01.kmers_KOC.sh: File containing....
 
 
 ***
