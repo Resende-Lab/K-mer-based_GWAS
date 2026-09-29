@@ -2,9 +2,9 @@
 
 ### Paper
 
-*Title*: Genome-wide association and genomic selection through k-mer-based variants in sweet corn. 
-Authors: Vianna, Mariana S.; Peixoto, Marco A.; Resende, Marcio F. R.  
-DOI: *
+**Title**: Genome-wide association and genomic selection through k-mer-based variants in sweet corn.  
+**Authors**: Vianna, Mariana S.; Peixoto, Marco A.; Resende, Marcio F. R.  
+**DOI**: *
 
 <br>
 
