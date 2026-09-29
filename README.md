@@ -1,34 +1,32 @@
 # K-mer-based GWAS and GS in a sweet corn population
 
-## Paper
+### Paper
 
-Title: Genome-wide association and genomic selection through k-mer-based variants in sweet corn
-Authors: Vianna, Mariana S.; Peixoto, Marco A.; Resende, Marcio F. R.
+*Title*: Genome-wide association and genomic selection through k-mer-based variants in sweet corn. 
+Authors: Vianna, Mariana S.; Peixoto, Marco A.; Resende, Marcio F. R.  
 DOI: *
 
 <br>
 
-## Content
+### Content
+
+1.Runme_KOC.sh: File containing....
 
 
 ***
 
-If you have any questions about the analyses, please, contact us!  
+If you have any questions about the analyses, please, contact me!  
 
 Mariana Vianna
 Email: mvianna@abacusbio.com
 
 
-Marco Antonio Peixoto  
-Email: deamorimpeixotom@ufl.edu  
-Page: https://marcopxt.github.io/  
-
 
 <br>
 
 
 
-## Bibliography
+### Bibliography
 
 He C, Washburn JD, Schleif N, Hao Y, Kaeppler H, Kaeppler SM, Zhang Z, Yang J, Liu S. 2024. Trait association and prediction through integrative k‐mer analysis. The Plant Journal. 120(2):833–850. https://doi.org/10.1111/tpj.17012.
 
