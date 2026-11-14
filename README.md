@@ -31,7 +31,7 @@
 If you have any questions about the analyses, please, contact me!  
 
 Mariana Vianna
-Email: mvianna@abacusbio.com
+Email: mariana.vianna11@gmail.com
 
 
 
